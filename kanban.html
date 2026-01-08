@@ -75,6 +75,23 @@
             background-color: #1a4a7e;
         }
 
+        .dev-status-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #0f3460;
+            border: none;
+            color: #7ec8e3;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dev-status-btn:hover {
+            background-color: #1a4a7e;
+        }
+
         .help-modal {
             max-width: 500px;
         }
@@ -396,6 +413,13 @@
             <span>📄</span> <span id="export-text">Link MD File</span>
         </button>
         <button class="help-btn" onclick="openHelp()">?</button>
+        <button class="dev-status-btn" onclick="openDevStatus()" title="Dev Status">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20V10"/>
+                <path d="M18 20V4"/>
+                <path d="M6 20v-4"/>
+            </svg>
+        </button>
     </div>
 
     <div class="board">
@@ -493,6 +517,19 @@
             </div>
             <div class="modal-buttons">
                 <button type="button" class="btn-save" onclick="closeHelp()">Got it!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dev Status Modal -->
+    <div class="modal-overlay" id="dev-status-modal">
+        <div class="modal help-modal">
+            <h2>Development Status</h2>
+            <div class="help-content" id="dev-status-content">
+                <!-- Populated by JavaScript -->
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-save" onclick="closeDevStatus()">Close</button>
             </div>
         </div>
     </div>
@@ -789,6 +826,34 @@
             document.getElementById('help-modal').classList.remove('active');
         }
 
+        function openDevStatus() {
+            const todoCount = tasks.filter(t => t.status === 'todo').length;
+            const inProgressCount = tasks.filter(t => t.status === 'in-progress').length;
+            const doneCount = tasks.filter(t => t.status === 'done').length;
+            const total = tasks.length;
+            const progress = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+
+            const content = `
+                <h3>Task Summary</h3>
+                <p><strong>Total Tasks:</strong> ${total}</p>
+                <p><strong>Todo:</strong> ${todoCount} | <strong>In Progress:</strong> ${inProgressCount} | <strong>Done:</strong> ${doneCount}</p>
+                <p><strong>Progress:</strong> ${progress}% complete</p>
+
+                <h3>Quick Start for Next Session</h3>
+                <p>Tell Claude Code: <em>"Check docs/progress.md for development status"</em></p>
+
+                <h3>To Implement a Task</h3>
+                <p>Click the hammer icon on any task to copy the implementation prompt.</p>
+            `;
+
+            document.getElementById('dev-status-content').innerHTML = content;
+            document.getElementById('dev-status-modal').classList.add('active');
+        }
+
+        function closeDevStatus() {
+            document.getElementById('dev-status-modal').classList.remove('active');
+        }
+
         document.getElementById('task-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -911,11 +976,18 @@
             }
         });
 
+        document.getElementById('dev-status-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDevStatus();
+            }
+        });
+
         // Close modal on Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeModal();
                 closeHelp();
+                closeDevStatus();
             }
         });
 
