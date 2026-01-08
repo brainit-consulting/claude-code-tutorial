@@ -59,6 +59,17 @@
             color: #fff;
         }
 
+        .export-btn.pending {
+            background-color: #f39c12;
+            color: #1a1a2e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
         .help-btn {
             width: 36px;
             height: 36px;
@@ -93,12 +104,37 @@
         }
 
         .help-modal {
-            max-width: 500px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .help-content {
             text-align: left;
+            overflow-y: auto;
+            max-height: 60vh;
+            padding-right: 10px;
             line-height: 1.6;
+        }
+
+        .help-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .help-content::-webkit-scrollbar-track {
+            background: #1a1a2e;
+            border-radius: 4px;
+        }
+
+        .help-content::-webkit-scrollbar-thumb {
+            background: #0f3460;
+            border-radius: 4px;
+        }
+
+        .help-content::-webkit-scrollbar-thumb:hover {
+            background: #1a4a7e;
         }
 
         .help-content h3 {
@@ -253,6 +289,7 @@
         .add-task-btn {
             width: 100%;
             padding: 12px;
+            margin-bottom: 15px;
             background-color: #0f3460;
             border: 2px dashed #1a4a7e;
             border-radius: 8px;
@@ -404,6 +441,124 @@
         .task {
             position: relative;
         }
+
+        /* Collapse/Expand for Done column */
+        .collapse-btn {
+            background: none;
+            border: none;
+            color: #7ec8e3;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px 8px;
+            margin-left: 8px;
+            transition: transform 0.2s;
+        }
+
+        .collapse-btn:hover {
+            color: #fff;
+        }
+
+        .collapse-btn.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .column.done .tasks.collapsed {
+            display: none;
+        }
+
+        /* Archive feature */
+        .archive-btn {
+            padding: 6px 12px;
+            background-color: #0f3460;
+            border: none;
+            border-radius: 4px;
+            color: #7ec8e3;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .archive-btn:hover {
+            background-color: #1a4a7e;
+        }
+
+        .archive-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .archived-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #0f3460;
+        }
+
+        .archived-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .archived-title {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .clear-archived-btn {
+            padding: 4px 8px;
+            background-color: transparent;
+            border: 1px solid #e94560;
+            border-radius: 4px;
+            color: #e94560;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .clear-archived-btn:hover {
+            background-color: #e94560;
+            color: #fff;
+        }
+
+        .archived-task {
+            background-color: #1a1a2e;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            opacity: 0.6;
+            border-left: 4px solid #333;
+        }
+
+        .archived-task .task-title {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .archived-task .task-meta {
+            font-size: 0.75rem;
+        }
+
+        .restore-btn {
+            background: none;
+            border: none;
+            color: #27ae60;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 2px 6px;
+        }
+
+        .restore-btn:hover {
+            text-decoration: underline;
+        }
+
+        .archived-count {
+            background-color: #333;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -428,8 +583,8 @@
                 <span class="column-title">Todo</span>
                 <span class="task-count">0</span>
             </div>
-            <div class="tasks" data-status="todo"></div>
             <button class="add-task-btn" onclick="openModal('todo')">+ Add Task</button>
+            <div class="tasks" data-status="todo"></div>
         </div>
 
         <div class="column in-progress" data-status="in-progress">
@@ -437,17 +592,26 @@
                 <span class="column-title">In Progress</span>
                 <span class="task-count">0</span>
             </div>
-            <div class="tasks" data-status="in-progress"></div>
             <button class="add-task-btn" onclick="openModal('in-progress')">+ Add Task</button>
+            <div class="tasks" data-status="in-progress"></div>
         </div>
 
         <div class="column done" data-status="done">
             <div class="column-header">
                 <span class="column-title">Done</span>
+                <button class="collapse-btn" id="collapse-done-btn" onclick="toggleDoneCollapse()" title="Collapse/Expand">▼</button>
                 <span class="task-count">0</span>
             </div>
-            <div class="tasks" data-status="done"></div>
-            <button class="add-task-btn" onclick="openModal('done')">+ Add Task</button>
+            <button class="add-task-btn" id="done-add-btn" onclick="openModal('done')">+ Add Task</button>
+            <div class="tasks" id="done-tasks" data-status="done"></div>
+            <button class="archive-btn" id="archive-btn" onclick="archiveDoneTasks()">📦 Archive All Done Tasks</button>
+            <div class="archived-section" id="archived-section" style="display: none;">
+                <div class="archived-header">
+                    <span class="archived-title">📁 Archived <span class="archived-count" id="archived-count">0</span></span>
+                    <button class="clear-archived-btn" onclick="clearArchivedTasks()">Clear All</button>
+                </div>
+                <div id="archived-tasks"></div>
+            </div>
         </div>
     </div>
 
@@ -514,6 +678,14 @@
 
                 <h3>Markdown Export</h3>
                 <p>Click "Link MD File" to connect a markdown file. It auto-updates whenever you create, edit, delete, or move tasks.</p>
+
+                <h3>Done Column</h3>
+                <ul>
+                    <li><strong>Collapse/Expand:</strong> Click the arrow (▼) to hide/show done tasks</li>
+                    <li><strong>Archive:</strong> Click "Archive All Done Tasks" to move completed tasks to archive</li>
+                    <li><strong>Restore:</strong> Click "Restore" on archived tasks to bring them back</li>
+                    <li><strong>Clear Archive:</strong> Click "Clear All" to permanently delete archived tasks</li>
+                </ul>
             </div>
             <div class="modal-buttons">
                 <button type="button" class="btn-save" onclick="closeHelp()">Got it!</button>
@@ -536,6 +708,8 @@
 
     <script>
         let tasks = JSON.parse(localStorage.getItem('kanban-tasks')) || [];
+        let archivedTasks = JSON.parse(localStorage.getItem('kanban-archived')) || [];
+        let doneCollapsed = localStorage.getItem('kanban-done-collapsed') === 'true';
         let fileHandle = null;
         let nextTaskNumber = parseInt(localStorage.getItem('kanban-next-number')) || 1;
 
@@ -586,6 +760,118 @@
 
         function saveTasks() {
             localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
+        }
+
+        function saveArchivedTasks() {
+            localStorage.setItem('kanban-archived', JSON.stringify(archivedTasks));
+        }
+
+        function saveDoneCollapsed() {
+            localStorage.setItem('kanban-done-collapsed', doneCollapsed.toString());
+        }
+
+        // Toggle collapse for Done column
+        function toggleDoneCollapse() {
+            doneCollapsed = !doneCollapsed;
+            saveDoneCollapsed();
+            updateDoneCollapseUI();
+        }
+
+        function updateDoneCollapseUI() {
+            const btn = document.getElementById('collapse-done-btn');
+            const tasksContainer = document.getElementById('done-tasks');
+            const archiveBtn = document.getElementById('archive-btn');
+
+            if (doneCollapsed) {
+                btn.classList.add('collapsed');
+                btn.textContent = '▶';
+                tasksContainer.classList.add('collapsed');
+                archiveBtn.style.display = 'none';
+            } else {
+                btn.classList.remove('collapsed');
+                btn.textContent = '▼';
+                tasksContainer.classList.remove('collapsed');
+                archiveBtn.style.display = 'block';
+            }
+        }
+
+        // Archive functionality
+        function archiveDoneTasks() {
+            const doneTasks = tasks.filter(t => t.status === 'done');
+            if (doneTasks.length === 0) return;
+
+            if (!confirm(`Archive ${doneTasks.length} done task(s)?`)) return;
+
+            // Move done tasks to archived
+            doneTasks.forEach(task => {
+                task.archivedAt = new Date().toISOString();
+                archivedTasks.unshift(task);
+            });
+
+            // Remove from active tasks
+            tasks = tasks.filter(t => t.status !== 'done');
+
+            saveTasks();
+            saveArchivedTasks();
+            renderTasks();
+            renderArchivedTasks();
+            saveMarkdownToFile();
+        }
+
+        function restoreTask(id) {
+            const taskIndex = archivedTasks.findIndex(t => t.id === id);
+            if (taskIndex === -1) return;
+
+            const task = archivedTasks[taskIndex];
+            delete task.archivedAt;
+            task.status = 'done';
+            tasks.push(task);
+            archivedTasks.splice(taskIndex, 1);
+
+            saveTasks();
+            saveArchivedTasks();
+            renderTasks();
+            renderArchivedTasks();
+            saveMarkdownToFile();
+        }
+
+        function clearArchivedTasks() {
+            if (archivedTasks.length === 0) return;
+            if (!confirm(`Permanently delete ${archivedTasks.length} archived task(s)?`)) return;
+
+            archivedTasks = [];
+            saveArchivedTasks();
+            renderArchivedTasks();
+        }
+
+        function renderArchivedTasks() {
+            const section = document.getElementById('archived-section');
+            const container = document.getElementById('archived-tasks');
+            const countEl = document.getElementById('archived-count');
+
+            countEl.textContent = archivedTasks.length;
+
+            if (archivedTasks.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            container.innerHTML = '';
+
+            archivedTasks.forEach(task => {
+                const div = document.createElement('div');
+                div.className = 'archived-task';
+                const taskNum = task.taskNumber ? `#${formatTaskNumber(task.taskNumber)} ` : '';
+                div.innerHTML = `
+                    <div class="task-title">${taskNum}${task.title}</div>
+                    <div class="task-meta">
+                        <span class="priority priority-${task.priority}">${task.priority}</span>
+                        <button class="restore-btn" onclick="restoreTask('${task.id}')">↩ Restore</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
         }
 
         function getNextTaskNumber() {
@@ -680,6 +966,14 @@
                 return;
             }
 
+            // Try to reconnect if we have a pending handle
+            if (pendingHandle) {
+                const reconnected = await reconnectFileHandle();
+                if (reconnected) {
+                    return;
+                }
+            }
+
             try {
                 fileHandle = await window.showSaveFilePicker({
                     suggestedName: 'kanban-features.md',
@@ -699,16 +993,23 @@
         }
 
         // Restore file handle on page load
+        let pendingHandle = null; // Handle waiting for permission
+
         async function restoreFileHandle() {
             try {
                 const handle = await loadFileHandle();
                 if (handle) {
-                    // Request permission to use the stored handle
-                    const permission = await handle.requestPermission({ mode: 'readwrite' });
+                    // First check current permission state without prompting
+                    const permission = await handle.queryPermission({ mode: 'readwrite' });
                     if (permission === 'granted') {
                         fileHandle = handle;
                         updateExportButton();
                         console.log('File handle restored');
+                    } else {
+                        // Permission not granted yet - store handle and show reconnect button
+                        pendingHandle = handle;
+                        updateExportButton();
+                        console.log('File handle found, click to reconnect');
                     }
                 }
             } catch (err) {
@@ -717,15 +1018,43 @@
             }
         }
 
+        async function reconnectFileHandle() {
+            if (!pendingHandle) return false;
+
+            try {
+                const permission = await pendingHandle.requestPermission({ mode: 'readwrite' });
+                if (permission === 'granted') {
+                    fileHandle = pendingHandle;
+                    pendingHandle = null;
+                    updateExportButton();
+                    await saveMarkdownToFile();
+                    console.log('File handle reconnected');
+                    return true;
+                }
+            } catch (err) {
+                console.log('Could not reconnect:', err);
+                pendingHandle = null;
+                await clearFileHandle();
+                updateExportButton();
+            }
+            return false;
+        }
+
         // Update export button appearance
         function updateExportButton() {
             const btn = document.getElementById('export-btn');
             const text = document.getElementById('export-text');
             if (fileHandle) {
                 btn.classList.add('connected');
+                btn.classList.remove('pending');
                 text.textContent = 'Auto-saving ✓';
+            } else if (pendingHandle) {
+                btn.classList.remove('connected');
+                btn.classList.add('pending');
+                text.textContent = '🔗 Reconnect';
             } else {
                 btn.classList.remove('connected');
+                btn.classList.remove('pending');
                 text.textContent = 'Link MD File';
             }
         }
@@ -787,6 +1116,13 @@
                     column.querySelector('.task-count').textContent = count;
                 }
             });
+
+            // Update archive button state
+            const doneCount = tasks.filter(t => t.status === 'done').length;
+            const archiveBtn = document.getElementById('archive-btn');
+            if (archiveBtn) {
+                archiveBtn.disabled = doneCount === 0;
+            }
         }
 
         function openModal(status) {
@@ -1008,6 +1344,8 @@
         // Initial render
         migrateExistingTasks();
         renderTasks();
+        renderArchivedTasks();
+        updateDoneCollapseUI();
         restoreFileHandle();
     </script>
 </body>

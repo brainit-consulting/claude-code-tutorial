@@ -39,6 +39,19 @@
 - [x] Modal explaining all features
 - [x] Closes on click outside, Escape, or "Got it!" button
 
+#### Done Column Management
+- [x] **Collapse/Expand** - Toggle button (▼/▶) to hide/show done tasks
+- [x] Collapse state persists across sessions
+- [x] **Archive Done Tasks** - Move all done tasks to archive section
+- [x] **Restore** - Bring archived tasks back to Done column
+- [x] **Clear Archive** - Permanently delete archived tasks
+- [x] Archived tasks stored in localStorage
+
+#### UI Improvements
+- [x] **+Add Task buttons at top** - Buttons now appear at top of columns for easy access
+- [x] **Help modal scrollable** - Wider modal with scrollbar for better readability
+- [x] **MD File reconnect** - Orange "Reconnect" button when file permission needed after refresh
+
 ### Files
 - `kanban.html` - Single-file application (HTML + CSS + JS)
 - `docs/progress.md` - This file
