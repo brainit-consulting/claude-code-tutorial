@@ -59,6 +59,53 @@
             color: #fff;
         }
 
+        .help-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #0f3460;
+            border: none;
+            color: #7ec8e3;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .help-btn:hover {
+            background-color: #1a4a7e;
+        }
+
+        .help-modal {
+            max-width: 500px;
+        }
+
+        .help-content {
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        .help-content h3 {
+            color: #7ec8e3;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .help-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .help-content li {
+            margin-bottom: 6px;
+            color: #ccc;
+        }
+
+        .help-content p {
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+
         .board {
             display: flex;
             gap: 20px;
@@ -296,7 +343,8 @@
         }
 
         .delete-btn,
-        .edit-btn {
+        .edit-btn,
+        .build-btn {
             position: absolute;
             top: 8px;
             background: none;
@@ -316,12 +364,24 @@
             right: 32px;
         }
 
+        .build-btn {
+            right: 56px;
+        }
+
         .delete-btn:hover {
             color: #e94560;
         }
 
         .edit-btn:hover {
             color: #7ec8e3;
+        }
+
+        .build-btn:hover {
+            color: #27ae60;
+        }
+
+        .build-btn.copied {
+            color: #27ae60;
         }
 
         .task {
@@ -335,6 +395,7 @@
         <button class="export-btn" id="export-btn" onclick="handleExport()">
             <span>📄</span> <span id="export-text">Link MD File</span>
         </button>
+        <button class="help-btn" onclick="openHelp()">?</button>
     </div>
 
     <div class="board">
@@ -405,6 +466,34 @@
                     <button type="submit" class="btn-save">Save Task</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal-overlay" id="help-modal">
+        <div class="modal help-modal">
+            <h2>How to Use Kanban Board</h2>
+            <div class="help-content">
+                <h3>Managing Tasks</h3>
+                <ul>
+                    <li><strong>Add Task:</strong> Click "+ Add Task" in any column</li>
+                    <li><strong>Edit Task:</strong> Click the pencil icon (&#9998;) on a task</li>
+                    <li><strong>Delete Task:</strong> Click the X button on a task</li>
+                    <li><strong>Move Task:</strong> Drag and drop between columns</li>
+                </ul>
+
+                <h3>Task Numbers</h3>
+                <p>Each task gets a unique number (#001, #002, etc.) for easy reference.</p>
+
+                <h3>Build Button</h3>
+                <p>Click the hammer icon (&#9874;) to copy a prompt to clipboard. Paste it into Claude Code to implement the task.</p>
+
+                <h3>Markdown Export</h3>
+                <p>Click "Link MD File" to connect a markdown file. It auto-updates whenever you create, edit, delete, or move tasks.</p>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-save" onclick="closeHelp()">Got it!</button>
+            </div>
         </div>
     </div>
 
@@ -555,6 +644,7 @@
             div.innerHTML = `
                 <button class="delete-btn" onclick="deleteTask('${task.id}')" title="Delete">&times;</button>
                 <button class="edit-btn" onclick="editTask('${task.id}')" title="Edit">&#9998;</button>
+                <button class="build-btn" onclick="copyBuildPrompt('${task.id}')" title="Copy build prompt">&#9874;</button>
                 <div class="task-title">${taskNum}${task.title}</div>
                 <div class="task-description">${task.description || 'No description'}</div>
                 <div class="task-meta">
@@ -623,6 +713,14 @@
             document.getElementById('task-id').value = '';
         }
 
+        function openHelp() {
+            document.getElementById('help-modal').classList.add('active');
+        }
+
+        function closeHelp() {
+            document.getElementById('help-modal').classList.remove('active');
+        }
+
         document.getElementById('task-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -660,6 +758,30 @@
             saveTasks();
             renderTasks();
             saveMarkdownToFile();
+        }
+
+        function copyBuildPrompt(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+
+            const num = task.taskNumber ? formatTaskNumber(task.taskNumber) : 'N/A';
+            let prompt = `Check if task #${num} "${task.title}" is implemented. If not, implement it.`;
+            if (task.description) {
+                prompt += `\n\nTask description: ${task.description}`;
+            }
+
+            navigator.clipboard.writeText(prompt).then(() => {
+                // Visual feedback
+                const btn = document.querySelector(`.task[data-id="${id}"] .build-btn`);
+                if (btn) {
+                    btn.classList.add('copied');
+                    btn.innerHTML = '&#10003;'; // Checkmark
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                        btn.innerHTML = '&#9874;'; // Hammer
+                    }, 1500);
+                }
+            });
         }
 
         // Drag and Drop
@@ -715,10 +837,17 @@
             }
         });
 
+        document.getElementById('help-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeHelp();
+            }
+        });
+
         // Close modal on Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeModal();
+                closeHelp();
             }
         });
 
