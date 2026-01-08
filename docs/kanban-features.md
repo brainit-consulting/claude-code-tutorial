@@ -1,8 +1,51 @@
 # My Task Board
 
-*Last updated: 1/8/2026, 10:01:08 AM*
+*Last updated: 1/8/2026, 12:54:41 PM*
 
 ## 📋 Todo
+
+### #025 Hosting Options
+- **Priority:** low
+- **Description:** Free Hosting Options
+
+  1. GitHub Pages (Recommended - Easiest)
+
+  - Cost: Free
+  - Pros: Already using GitHub, takes 2 minutes to set up, automatic deploys on push
+  - URL: https://brainit-consulting.github.io/claude-code-tutorial/kanban.html
+  - Setup: Just enable in repo Settings → Pages
+
+  2. Vercel
+
+  - Cost: Free tier
+  - Pros: Fast CDN, custom domains, automatic HTTPS
+  - URL: https://your-project.vercel.app
+  - Setup: Connect GitHub repo, auto-deploys
+
+  3. Netlify
+
+  - Cost: Free tier
+  - Pros: Similar to Vercel, drag-and-drop deploy option
+  - URL: https://your-project.netlify.app
+
+  4. Cloudflare Pages
+
+  - Cost: Free tier (generous limits)
+  - Pros: Excellent global CDN, unlimited bandwidth
+  - URL: https://your-project.pages.dev
+
+  My Recommendation
+
+  GitHub Pages - Since you're already using GitHub, it's the fastest path:
+  1. Go to repo Settings → Pages
+  2. Select "main" branch as source
+  3. Done! Live in ~1 minute
+
+  Would you like me to:
+  1. Set up GitHub Pages (simplest - just needs a small config)
+  2. Prepare for Vercel (if you want a cleaner URL or custom domain)
+  3. Something else?
+- **Tags:** kanban, hosting
 
 ### #023 fix relink of md file on refresh
 - **Priority:** high
