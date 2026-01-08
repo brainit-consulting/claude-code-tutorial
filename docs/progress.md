@@ -8,8 +8,8 @@
 - [x] **Create** - Add tasks via modal form
 - [x] **Read** - Display tasks from localStorage
 - [x] **Update** - Edit tasks (title, description, priority, tags, status)
-- [x] **Delete** - Remove tasks with X button
-- [x] **Drag & Drop** - Move tasks between columns (Todo, In Progress, Done)
+- [x] **Delete** - Remove tasks with trash bin icon
+- [x] **Drag & Drop** - Move tasks between columns with visual feedback
 
 #### Task Numbering
 - [x] Unique sequential task numbers (#001, #002, etc.)
@@ -47,10 +47,18 @@
 - [x] **Clear Archive** - Permanently delete archived tasks
 - [x] Archived tasks stored in localStorage
 
+#### Customization
+- [x] **Editable Board Title** - Click the title to edit, press Enter or blur to save
+- [x] Title persists across sessions in localStorage
+- [x] Custom title used in markdown export
+
 #### UI Improvements
 - [x] **+Add Task buttons at top** - Buttons now appear at top of columns for easy access
 - [x] **Help modal scrollable** - Wider modal with scrollbar for better readability
 - [x] **MD File reconnect** - Orange "Reconnect" button when file permission needed after refresh
+- [x] **Trash bin icon** - SVG trash icon for delete button (replaces ×)
+- [x] **Drag & drop visual feedback** - Dashed border highlight on valid drop zones
+- [x] **Drop anywhere in column** - Tasks can be dropped on any area within a column
 
 ### Files
 - `kanban.html` - Single-file application (HTML + CSS + JS)

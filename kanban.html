@@ -35,6 +35,20 @@
 
         .header h1 {
             margin-bottom: 0;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .header h1:hover {
+            border-color: #0f3460;
+        }
+
+        .header h1:focus {
+            outline: none;
+            border-color: #7ec8e3;
         }
 
         .export-btn {
@@ -573,7 +587,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>Kanban Board</h1>
+        <h1 id="board-title" contenteditable="true" spellcheck="false" title="Click to edit title">Kanban Board</h1>
         <button class="export-btn" id="export-btn" onclick="handleExport()">
             <span>📄</span> <span id="export-text">Link MD File</span>
         </button>
@@ -672,12 +686,15 @@
         <div class="modal help-modal">
             <h2>How to Use Kanban Board</h2>
             <div class="help-content">
+                <h3>Board Title</h3>
+                <p>Click the title at the top to edit it. Press Enter or click away to save.</p>
+
                 <h3>Managing Tasks</h3>
                 <ul>
-                    <li><strong>Add Task:</strong> Click "+ Add Task" in any column</li>
+                    <li><strong>Add Task:</strong> Click "+ Add Task" at the top of any column</li>
                     <li><strong>Edit Task:</strong> Click the pencil icon (&#9998;) on a task</li>
-                    <li><strong>Delete Task:</strong> Click the X button on a task</li>
-                    <li><strong>Move Task:</strong> Drag and drop between columns</li>
+                    <li><strong>Delete Task:</strong> Click the trash icon (&#128465;) on a task</li>
+                    <li><strong>Move Task:</strong> Drag and drop anywhere in a column (highlighted when valid)</li>
                 </ul>
 
                 <h3>Task Numbers</h3>
@@ -687,7 +704,11 @@
                 <p>Click the hammer icon (&#9874;) to copy a prompt to clipboard. Paste it into Claude Code to implement the task.</p>
 
                 <h3>Markdown Export</h3>
-                <p>Click "Link MD File" to connect a markdown file. It auto-updates whenever you create, edit, delete, or move tasks.</p>
+                <ul>
+                    <li><strong>Link File:</strong> Click "Link MD File" to connect a markdown file</li>
+                    <li><strong>Auto-save:</strong> File updates on create, edit, delete, or move</li>
+                    <li><strong>Reconnect:</strong> Click orange "Reconnect" button after page refresh</li>
+                </ul>
 
                 <h3>Done Column</h3>
                 <ul>
@@ -720,6 +741,7 @@
         let tasks = JSON.parse(localStorage.getItem('kanban-tasks')) || [];
         let archivedTasks = JSON.parse(localStorage.getItem('kanban-archived')) || [];
         let doneCollapsed = localStorage.getItem('kanban-done-collapsed') === 'true';
+        let boardTitle = localStorage.getItem('kanban-board-title') || 'Kanban Board';
         let fileHandle = null;
         let nextTaskNumber = parseInt(localStorage.getItem('kanban-next-number')) || 1;
 
@@ -898,7 +920,7 @@
         // Generate markdown content from tasks
         function generateMarkdown() {
             const now = new Date().toLocaleString();
-            let md = `# Kanban Board Features\n\n`;
+            let md = `# ${boardTitle}\n\n`;
             md += `*Last updated: ${now}*\n\n`;
 
             // Sort by taskNumber descending (newest first)
@@ -1220,7 +1242,7 @@
                 <p>Tell Claude Code: <em>"Check docs/progress.md for development status"</em></p>
 
                 <h3>To Implement a Task</h3>
-                <p>Click the hammer icon on any task to copy the implementation prompt.</p>
+                <p>Click the hammer icon (&#9874;) on any task to copy the implementation prompt.</p>
             `;
 
             document.getElementById('dev-status-content').innerHTML = content;
@@ -1417,11 +1439,37 @@
             }
         }
 
+        // Board title handling
+        function initBoardTitle() {
+            const titleEl = document.getElementById('board-title');
+            titleEl.textContent = boardTitle;
+            document.title = boardTitle;
+
+            titleEl.addEventListener('blur', saveBoardTitle);
+            titleEl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.blur();
+                }
+            });
+        }
+
+        function saveBoardTitle() {
+            const titleEl = document.getElementById('board-title');
+            const newTitle = titleEl.textContent.trim() || 'Kanban Board';
+            titleEl.textContent = newTitle;
+            boardTitle = newTitle;
+            localStorage.setItem('kanban-board-title', boardTitle);
+            document.title = boardTitle;
+            saveMarkdownToFile();
+        }
+
         // Initial render
         migrateExistingTasks();
         renderTasks();
         renderArchivedTasks();
         updateDoneCollapseUI();
+        initBoardTitle();
         restoreFileHandle();
     </script>
 </body>

@@ -1,11 +1,13 @@
-# Kanban Board Features
+# My Task Board
 
-*Last updated: 1/8/2026, 7:45:34 AM*
+*Last updated: 1/8/2026, 8:14:13 AM*
 
 ## 📋 Todo
 
-### #015 test
-- **Priority:** low
+### #019 Kanban Board Title
+- **Priority:** high
+- **Description:** Allow the user to edit / customize the Title for the Kanban Board
+- **Tags:** kanban, coding
 
 ### #012 run_scorpion_sf_ladder.bat
 - **Priority:** low
@@ -18,22 +20,31 @@
 Purpose: *find a comparable opponent*
 - **Tags:** chess, elo, ladder, scorpion, stockfish
 
-### #011 claude deep dive agents
+### #008 Collapse / Expand Done Tasks
 - **Priority:** low
-- **Description:** tell claude to fire up 3 parallell deep dive agents to look for and fix any critical bugs the kanban application
-- **Tags:** claude, learn, agents
-
-## 🔄 In Progress
-
-### #013 replace x with bin svg icon
-- **Priority:** low
-- **Description:** Each task currently uses an x for deleting the task. change the x for a svg bin icon
+- **Description:** Design a plan to effectively manage Done Tasks by allow the user to a) Collapse/Expand them and b) add an Arhive Done Tasks Feature. Also, Make sure the icons with hammer, edit etc is never blocked by the Task title
 - **Tags:** kanban
 
 ### #007 Learn Plusify
 - **Priority:** medium
 - **Description:** From Leon
 https://www.skool.com/agentic-labs/classroom/18df5641?md=a4fba50bef8f42b885dfb598133092f5
+
+## 🔄 In Progress
+
+### #017 Codex
+- **Priority:** high
+- **Description:** Check on chess codex status
+- **Tags:** chess
+
+### #016 empty task test
+- **Priority:** high
+- **Description:** drag a card to another column test
+
+### #011 claude deep dive agents
+- **Priority:** low
+- **Description:** tell claude to fire up 3 parallell deep dive agents to look for and fix any critical bugs the kanban application
+- **Tags:** claude, learn, agents
 
 ### #002 Learn Claude Code
 - **Priority:** high
@@ -42,10 +53,21 @@ https://www.skool.com/agentic-labs/classroom/18df5641?md=a4fba50bef8f42b885dfb59
 
 ## ✅ Done
 
+### #018 Develop an Toaster app
+- **Priority:** low
+
+### #015 test
+- **Priority:** low
+
 ### #014 action icons needs more room
 - **Priority:** low
 - **Description:** give a little bit more room for the action icons of each task by move the title of each task down a bit, they should not make    
   the hard to use by blocking them
+- **Tags:** kanban
+
+### #013 replace x with bin svg icon
+- **Priority:** low
+- **Description:** Each task currently uses an x for deleting the task. change the x for a svg bin icon
 - **Tags:** kanban
 
 ### #010 Move +Add Task Buttons to Top
@@ -55,9 +77,4 @@ https://www.skool.com/agentic-labs/classroom/18df5641?md=a4fba50bef8f42b885dfb59
 
 ### #009 test relinking of md file
 - **Priority:** low
-
-### #008 Collapse / Expand Done Tasks
-- **Priority:** low
-- **Description:** Design a plan to effectively manage Done Tasks by allow the user to a) Collapse/Expand them and b) add an Arhive Done Tasks Feature. Also, Make sure the icons with hammer, edit etc is never blocked by the Task title
-- **Tags:** kanban
 
