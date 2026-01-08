@@ -1,8 +1,27 @@
 # My Task Board
 
-*Last updated: 1/8/2026, 12:54:41 PM*
+*Last updated: 1/8/2026, 12:57:58 PM*
 
 ## 📋 Todo
+
+### #026 How to deploy to github pages
+- **Priority:** low
+- **Description:** Enable GitHub Pages (30 seconds)
+
+  1. Go to: https://github.com/brainit-consulting/claude-code-tutorial/settings/pages
+  2. Under "Source":
+    - Select "Deploy from a branch"
+    - Branch: main
+    - Folder: / (root)
+  3. Click Save
+  4. Wait 1-2 minutes for deployment
+
+  Your Live URL
+
+  https://brainit-consulting.github.io/claude-code-tutorial/
+
+  The root URL will automatically redirect to your Kanban board. Let me know once you've enabled it and I can help verify it's working!
+- **Tags:** github pages, kanban, deploy
 
 ### #025 Hosting Options
 - **Priority:** low
