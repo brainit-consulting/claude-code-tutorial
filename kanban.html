@@ -129,6 +129,11 @@
             color: #fff;
         }
 
+        .task-number {
+            color: #7ec8e3;
+            font-weight: 500;
+        }
+
         .task-description {
             font-size: 0.9rem;
             color: #aaa;
@@ -399,9 +404,21 @@
     <script>
         let tasks = JSON.parse(localStorage.getItem('kanban-tasks')) || [];
         let fileHandle = null;
+        let nextTaskNumber = parseInt(localStorage.getItem('kanban-next-number')) || 1;
 
         function saveTasks() {
             localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
+        }
+
+        function getNextTaskNumber() {
+            const num = nextTaskNumber;
+            nextTaskNumber++;
+            localStorage.setItem('kanban-next-number', nextTaskNumber.toString());
+            return num;
+        }
+
+        function formatTaskNumber(num) {
+            return String(num).padStart(3, '0');
         }
 
         // Generate markdown content from tasks
@@ -417,7 +434,8 @@
             if (todoTasks.length > 0) {
                 md += `## 📋 Todo\n\n`;
                 todoTasks.forEach(task => {
-                    md += `### ${task.title}\n`;
+                    const num = task.taskNumber ? `#${formatTaskNumber(task.taskNumber)} ` : '';
+                    md += `### ${num}${task.title}\n`;
                     md += `- **Priority:** ${task.priority}\n`;
                     if (task.description) md += `- **Description:** ${task.description}\n`;
                     if (task.tags.length > 0) md += `- **Tags:** ${task.tags.join(', ')}\n`;
@@ -428,7 +446,8 @@
             if (inProgressTasks.length > 0) {
                 md += `## 🔄 In Progress\n\n`;
                 inProgressTasks.forEach(task => {
-                    md += `### ${task.title}\n`;
+                    const num = task.taskNumber ? `#${formatTaskNumber(task.taskNumber)} ` : '';
+                    md += `### ${num}${task.title}\n`;
                     md += `- **Priority:** ${task.priority}\n`;
                     if (task.description) md += `- **Description:** ${task.description}\n`;
                     if (task.tags.length > 0) md += `- **Tags:** ${task.tags.join(', ')}\n`;
@@ -439,7 +458,8 @@
             if (doneTasks.length > 0) {
                 md += `## ✅ Done\n\n`;
                 doneTasks.forEach(task => {
-                    md += `### ${task.title}\n`;
+                    const num = task.taskNumber ? `#${formatTaskNumber(task.taskNumber)} ` : '';
+                    md += `### ${num}${task.title}\n`;
                     md += `- **Priority:** ${task.priority}\n`;
                     if (task.description) md += `- **Description:** ${task.description}\n`;
                     if (task.tags.length > 0) md += `- **Tags:** ${task.tags.join(', ')}\n`;
@@ -523,10 +543,12 @@
                 ? `<div class="tags">${task.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>`
                 : '';
 
+            const taskNum = task.taskNumber ? `<span class="task-number">#${formatTaskNumber(task.taskNumber)}</span> ` : '';
+
             div.innerHTML = `
                 <button class="delete-btn" onclick="deleteTask('${task.id}')" title="Delete">&times;</button>
                 <button class="edit-btn" onclick="editTask('${task.id}')" title="Edit">&#9998;</button>
-                <div class="task-title">${task.title}</div>
+                <div class="task-title">${taskNum}${task.title}</div>
                 <div class="task-description">${task.description || 'No description'}</div>
                 <div class="task-meta">
                     <span class="priority priority-${task.priority}">${task.priority}</span>
@@ -616,8 +638,8 @@
                     tasks[taskIndex] = { ...tasks[taskIndex], ...taskData };
                 }
             } else {
-                // Create new task
-                tasks.push({ id: generateId(), ...taskData });
+                // Create new task with unique number
+                tasks.push({ id: generateId(), taskNumber: getNextTaskNumber(), ...taskData });
                 // Auto-save markdown when new task is created
                 saveMarkdownToFile();
             }
