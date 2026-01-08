@@ -456,6 +456,35 @@
             background-color: #c73e54;
         }
 
+        .btn-confirm {
+            background-color: #e94560;
+            color: #fff;
+        }
+
+        .btn-confirm:hover {
+            background-color: #c73e54;
+        }
+
+        .confirm-modal {
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .confirm-modal h2 {
+            margin-bottom: 10px;
+        }
+
+        .confirm-modal p {
+            color: #aaa;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .confirm-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
         .delete-btn,
         .edit-btn,
         .build-btn {
@@ -801,6 +830,19 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal confirm-modal">
+            <div class="confirm-icon">📦</div>
+            <h2 id="confirm-title">Confirm Action</h2>
+            <p id="confirm-message">Are you sure?</p>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button type="button" class="btn-confirm" id="confirm-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let tasks = JSON.parse(localStorage.getItem('kanban-tasks')) || [];
         let archivedTasks = JSON.parse(localStorage.getItem('kanban-archived')) || [];
@@ -919,22 +961,27 @@
             const doneTasks = tasks.filter(t => t.status === 'done');
             if (doneTasks.length === 0) return;
 
-            if (!confirm(`Archive ${doneTasks.length} done task(s)?`)) return;
+            showConfirmModal(
+                'Archive Tasks',
+                `Archive ${doneTasks.length} done task${doneTasks.length > 1 ? 's' : ''}?`,
+                '📦',
+                function() {
+                    // Move done tasks to archived
+                    doneTasks.forEach(task => {
+                        task.archivedAt = new Date().toISOString();
+                        archivedTasks.unshift(task);
+                    });
 
-            // Move done tasks to archived
-            doneTasks.forEach(task => {
-                task.archivedAt = new Date().toISOString();
-                archivedTasks.unshift(task);
-            });
+                    // Remove from active tasks
+                    tasks = tasks.filter(t => t.status !== 'done');
 
-            // Remove from active tasks
-            tasks = tasks.filter(t => t.status !== 'done');
-
-            saveTasks();
-            saveArchivedTasks();
-            renderTasks();
-            renderArchivedTasks();
-            saveMarkdownToFile();
+                    saveTasks();
+                    saveArchivedTasks();
+                    renderTasks();
+                    renderArchivedTasks();
+                    saveMarkdownToFile();
+                }
+            );
         }
 
         function restoreTask(id) {
@@ -956,11 +1003,17 @@
 
         function clearArchivedTasks() {
             if (archivedTasks.length === 0) return;
-            if (!confirm(`Permanently delete ${archivedTasks.length} archived task(s)?`)) return;
 
-            archivedTasks = [];
-            saveArchivedTasks();
-            renderArchivedTasks();
+            showConfirmModal(
+                'Clear Archive',
+                `Permanently delete ${archivedTasks.length} archived task${archivedTasks.length > 1 ? 's' : ''}?`,
+                '🗑️',
+                function() {
+                    archivedTasks = [];
+                    saveArchivedTasks();
+                    renderArchivedTasks();
+                }
+            );
         }
 
         function renderArchivedTasks() {
@@ -1339,6 +1392,35 @@
         function closeDevStatus() {
             document.getElementById('dev-status-modal').classList.remove('active');
         }
+
+        // Confirmation Modal
+        let confirmCallback = null;
+
+        function showConfirmModal(title, message, icon, onConfirm) {
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-message').textContent = message;
+            document.querySelector('.confirm-icon').textContent = icon;
+            confirmCallback = onConfirm;
+            document.getElementById('confirm-modal').classList.add('active');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.remove('active');
+            confirmCallback = null;
+        }
+
+        document.getElementById('confirm-btn').addEventListener('click', function() {
+            if (confirmCallback) {
+                confirmCallback();
+            }
+            closeConfirmModal();
+        });
+
+        document.getElementById('confirm-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeConfirmModal();
+            }
+        });
 
         document.getElementById('task-form').addEventListener('submit', function(e) {
             e.preventDefault();
