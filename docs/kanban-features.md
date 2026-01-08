@@ -1,13 +1,13 @@
 # My Task Board
 
-*Last updated: 1/8/2026, 8:14:13 AM*
+*Last updated: 1/8/2026, 8:24:05 AM*
 
 ## 📋 Todo
 
-### #019 Kanban Board Title
-- **Priority:** high
-- **Description:** Allow the user to edit / customize the Title for the Kanban Board
-- **Tags:** kanban, coding
+### #021 Archive Tasks Rollup
+- **Priority:** low
+- **Description:** allow the user to collapse and expand the archived tasks.
+- **Tags:** kanban
 
 ### #012 run_scorpion_sf_ladder.bat
 - **Priority:** low
@@ -20,17 +20,17 @@
 Purpose: *find a comparable opponent*
 - **Tags:** chess, elo, ladder, scorpion, stockfish
 
-### #008 Collapse / Expand Done Tasks
-- **Priority:** low
-- **Description:** Design a plan to effectively manage Done Tasks by allow the user to a) Collapse/Expand them and b) add an Arhive Done Tasks Feature. Also, Make sure the icons with hammer, edit etc is never blocked by the Task title
-- **Tags:** kanban
-
 ### #007 Learn Plusify
 - **Priority:** medium
 - **Description:** From Leon
 https://www.skool.com/agentic-labs/classroom/18df5641?md=a4fba50bef8f42b885dfb598133092f5
 
 ## 🔄 In Progress
+
+### #020 Ui Cards
+- **Priority:** low
+- **Description:** Lets make the cards have a different color tone, with outline, and drop shadow and be easier to see against the back ground. each columns should also have a slight variation in color in the the same color wheel family of the current theme. try gradients.
+- **Tags:** kanban, ui
 
 ### #017 Codex
 - **Priority:** high
@@ -53,28 +53,13 @@ https://www.skool.com/agentic-labs/classroom/18df5641?md=a4fba50bef8f42b885dfb59
 
 ## ✅ Done
 
-### #018 Develop an Toaster app
-- **Priority:** low
+### #019 Kanban Board Title
+- **Priority:** high
+- **Description:** Allow the user to edit / customize the Title for the Kanban Board
+- **Tags:** kanban, coding
 
-### #015 test
+### #008 Collapse / Expand Done Tasks
 - **Priority:** low
-
-### #014 action icons needs more room
-- **Priority:** low
-- **Description:** give a little bit more room for the action icons of each task by move the title of each task down a bit, they should not make    
-  the hard to use by blocking them
+- **Description:** Design a plan to effectively manage Done Tasks by allow the user to a) Collapse/Expand them and b) add an Arhive Done Tasks Feature. Also, Make sure the icons with hammer, edit etc is never blocked by the Task title
 - **Tags:** kanban
-
-### #013 replace x with bin svg icon
-- **Priority:** low
-- **Description:** Each task currently uses an x for deleting the task. change the x for a svg bin icon
-- **Tags:** kanban
-
-### #010 Move +Add Task Buttons to Top
-- **Priority:** low
-- **Description:** When We have too many Tasks on the Kanban Board, The user needs to have a bettet way to find the +Add Task Button. One idea is to keep the +Add Task buttons (all three cards) near the top, but if you have a better idea...suggested before makeing code changes.
-- **Tags:** kanban, ui
-
-### #009 test relinking of md file
-- **Priority:** low
 

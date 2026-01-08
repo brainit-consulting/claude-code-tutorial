@@ -59,6 +59,9 @@
 - [x] **Trash bin icon** - SVG trash icon for delete button (replaces ×)
 - [x] **Drag & drop visual feedback** - Dashed border highlight on valid drop zones
 - [x] **Drop anywhere in column** - Tasks can be dropped on any area within a column
+- [x] **Enhanced card design** - Gradient backgrounds, drop shadows, subtle outlines
+- [x] **Column gradients** - Each column has unique gradient with color accent at top
+- [x] **Column-specific task accents** - Left border color matches column theme
 
 ### Files
 - `kanban.html` - Single-file application (HTML + CSS + JS)
