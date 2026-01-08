@@ -647,12 +647,11 @@
             } else {
                 // Create new task with unique number
                 tasks.push({ id: generateId(), taskNumber: getNextTaskNumber(), ...taskData });
-                // Auto-save markdown when new task is created
-                saveMarkdownToFile();
             }
 
             saveTasks();
             renderTasks();
+            saveMarkdownToFile();
             closeModal();
         });
 
@@ -660,6 +659,7 @@
             tasks = tasks.filter(t => t.id !== id);
             saveTasks();
             renderTasks();
+            saveMarkdownToFile();
         }
 
         // Drag and Drop
@@ -702,6 +702,7 @@
                         task.status = newStatus;
                         saveTasks();
                         renderTasks();
+                        saveMarkdownToFile();
                     }
                 }
             });
