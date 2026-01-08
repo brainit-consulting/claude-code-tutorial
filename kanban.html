@@ -33,6 +33,12 @@
             margin-bottom: 30px;
         }
 
+        .version-display {
+            font-size: 0.85rem;
+            color: #90EE90;
+            font-family: monospace;
+        }
+
         .header h1 {
             margin-bottom: 0;
             cursor: pointer;
@@ -710,6 +716,7 @@
                 <path d="M6 20v-4"/>
             </svg>
         </button>
+        <span class="version-display" id="version-display">V1.0.0</span>
     </div>
 
     <div class="board">
@@ -870,6 +877,18 @@
         let boardTitle = localStorage.getItem('kanban-board-title') || 'Kanban Board';
         let fileHandle = null;
         let nextTaskNumber = parseInt(localStorage.getItem('kanban-next-number')) || 1;
+
+        // Load and display app version
+        async function loadVersion() {
+            try {
+                const response = await fetch('version.json');
+                const data = await response.json();
+                document.getElementById('version-display').textContent = 'V' + data.version;
+            } catch (e) {
+                console.log('Could not load version');
+            }
+        }
+        loadVersion();
 
         // IndexedDB for persisting file handle
         const DB_NAME = 'kanban-db';

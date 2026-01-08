@@ -1,6 +1,6 @@
 # My Task Board
 
-*Last updated: 1/8/2026, 12:57:58 PM*
+*Last updated: 1/8/2026, 1:41:34 PM*
 
 ## 📋 Todo
 
@@ -113,6 +113,11 @@ https://www.skool.com/agentic-labs/classroom/18df5641?md=a4fba50bef8f42b885dfb59
 - **Tags:** code, learn, claude
 
 ## ✅ Done
+
+### #027 App Version n.n.1
+- **Priority:** low
+- **Description:** Add Vn.n.n on top right of the toolbar. Auto update for every commit
+- **Tags:** kanban, version
 
 ### #022 n8n upgrade
 - **Priority:** low
