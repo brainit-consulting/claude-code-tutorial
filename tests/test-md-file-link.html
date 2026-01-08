@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Tests - MD File Linking</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+        h1 { color: #e94560; }
+        .test-suite { margin: 20px 0; }
+        .test-case {
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .test-case.pass { background: #1e4d2b; }
+        .test-case.fail { background: #4d1e1e; }
+        .test-case.pending { background: #3d3d1e; }
+        .status { font-weight: bold; }
+        .pass .status { color: #4ade80; }
+        .fail .status { color: #f87171; }
+        .pending .status { color: #fbbf24; }
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: #16213e;
+            border-radius: 8px;
+        }
+        .error-details {
+            font-size: 0.85rem;
+            color: #f87171;
+            margin-top: 5px;
+            padding-left: 15px;
+        }
+        button {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+        button:hover { background: #c73e54; }
+    </style>
+</head>
+<body>
+    <h1>MD File Linking - Unit Tests</h1>
+    <button onclick="runAllTests()">Run All Tests</button>
+    <div id="test-results"></div>
+    <div id="summary" class="summary"></div>
+
+    <script>
+        // Test Framework
+        const tests = [];
+        const results = { pass: 0, fail: 0 };
+
+        function test(name, fn) {
+            tests.push({ name, fn });
+        }
+
+        function assertEqual(actual, expected, message = '') {
+            if (actual !== expected) {
+                throw new Error(`${message}\nExpected: ${expected}\nActual: ${actual}`);
+            }
+        }
+
+        function assertTrue(condition, message = '') {
+            if (!condition) {
+                throw new Error(message || 'Expected condition to be true');
+            }
+        }
+
+        function assertFalse(condition, message = '') {
+            if (condition) {
+                throw new Error(message || 'Expected condition to be false');
+            }
+        }
+
+        // Mock IndexedDB
+        class MockIndexedDB {
+            constructor() {
+                this.store = {};
+            }
+
+            async get(key) {
+                return this.store[key] || null;
+            }
+
+            async set(key, value) {
+                this.store[key] = value;
+            }
+
+            async delete(key) {
+                delete this.store[key];
+            }
+
+            clear() {
+                this.store = {};
+            }
+        }
+
+        // Mock File Handle
+        class MockFileHandle {
+            constructor(name, permissionState = 'prompt') {
+                this.name = name;
+                this._permissionState = permissionState;
+                this._fileExists = true;
+            }
+
+            async queryPermission(options) {
+                return this._permissionState;
+            }
+
+            async requestPermission(options) {
+                // Simulate user granting permission
+                if (this._permissionState === 'prompt') {
+                    this._permissionState = 'granted';
+                }
+                return this._permissionState;
+            }
+
+            async createWritable() {
+                if (!this._fileExists) {
+                    throw new Error('File not found');
+                }
+                return {
+                    write: async (data) => {},
+                    close: async () => {}
+                };
+            }
+
+            setPermission(state) {
+                this._permissionState = state;
+            }
+
+            setFileExists(exists) {
+                this._fileExists = exists;
+            }
+        }
+
+        // System Under Test - File Handle Manager
+        class FileHandleManager {
+            constructor(db) {
+                this.db = db;
+                this.fileHandle = null;
+                this.pendingHandle = null;
+            }
+
+            async saveFileHandle(handle) {
+                await this.db.set('md-file-handle', handle);
+            }
+
+            async loadFileHandle() {
+                return await this.db.get('md-file-handle');
+            }
+
+            async clearFileHandle() {
+                await this.db.delete('md-file-handle');
+            }
+
+            async restoreFileHandle() {
+                try {
+                    const handle = await this.loadFileHandle();
+                    if (handle) {
+                        const permission = await handle.queryPermission({ mode: 'readwrite' });
+                        if (permission === 'granted') {
+                            this.fileHandle = handle;
+                            return { status: 'restored', handle };
+                        } else {
+                            this.pendingHandle = handle;
+                            return { status: 'pending', handle };
+                        }
+                    }
+                    return { status: 'none' };
+                } catch (err) {
+                    await this.clearFileHandle();
+                    return { status: 'error', error: err };
+                }
+            }
+
+            async reconnectFileHandle() {
+                if (!this.pendingHandle) return { success: false, reason: 'no_pending' };
+
+                try {
+                    const permission = await this.pendingHandle.requestPermission({ mode: 'readwrite' });
+                    if (permission === 'granted') {
+                        this.fileHandle = this.pendingHandle;
+                        this.pendingHandle = null;
+                        return { success: true };
+                    }
+                    return { success: false, reason: 'denied' };
+                } catch (err) {
+                    this.pendingHandle = null;
+                    await this.clearFileHandle();
+                    return { success: false, reason: 'error', error: err };
+                }
+            }
+
+            getButtonState() {
+                if (this.fileHandle) return 'connected';
+                if (this.pendingHandle) return 'pending';
+                return 'disconnected';
+            }
+
+            async saveToFile(content) {
+                if (!this.fileHandle) return { success: false, reason: 'no_handle' };
+
+                try {
+                    const writable = await this.fileHandle.createWritable();
+                    await writable.write(content);
+                    await writable.close();
+                    return { success: true };
+                } catch (err) {
+                    this.fileHandle = null;
+                    await this.clearFileHandle();
+                    return { success: false, reason: 'error', error: err };
+                }
+            }
+        }
+
+        // ========== TEST CASES ==========
+
+        test('Initial state - no stored handle shows "Link MD File"', async () => {
+            const db = new MockIndexedDB();
+            const manager = new FileHandleManager(db);
+
+            const result = await manager.restoreFileHandle();
+
+            assertEqual(result.status, 'none', 'Should have no stored handle');
+            assertEqual(manager.getButtonState(), 'disconnected', 'Button should show Link MD File');
+        });
+
+        test('Restore with granted permission shows "Auto-saving"', async () => {
+            const db = new MockIndexedDB();
+            const handle = new MockFileHandle('test.md', 'granted');
+            await db.set('md-file-handle', handle);
+
+            const manager = new FileHandleManager(db);
+            const result = await manager.restoreFileHandle();
+
+            assertEqual(result.status, 'restored', 'Should restore handle');
+            assertEqual(manager.getButtonState(), 'connected', 'Button should show Auto-saving');
+            assertEqual(manager.fileHandle, handle, 'File handle should be set');
+        });
+
+        test('Restore with pending permission shows "Reconnect"', async () => {
+            const db = new MockIndexedDB();
+            const handle = new MockFileHandle('test.md', 'prompt');
+            await db.set('md-file-handle', handle);
+
+            const manager = new FileHandleManager(db);
+            const result = await manager.restoreFileHandle();
+
+            assertEqual(result.status, 'pending', 'Should have pending handle');
+            assertEqual(manager.getButtonState(), 'pending', 'Button should show Reconnect');
+            assertEqual(manager.pendingHandle, handle, 'Pending handle should be set');
+            assertEqual(manager.fileHandle, null, 'File handle should be null');
+        });
+
+        test('Reconnect grants permission and restores handle', async () => {
+            const db = new MockIndexedDB();
+            const handle = new MockFileHandle('test.md', 'prompt');
+            await db.set('md-file-handle', handle);
+
+            const manager = new FileHandleManager(db);
+            await manager.restoreFileHandle();
+
+            assertEqual(manager.getButtonState(), 'pending', 'Should be pending before reconnect');
+
+            const result = await manager.reconnectFileHandle();
+
+            assertTrue(result.success, 'Reconnect should succeed');
+            assertEqual(manager.getButtonState(), 'connected', 'Should be connected after reconnect');
+            assertEqual(manager.fileHandle, handle, 'File handle should be set');
+            assertEqual(manager.pendingHandle, null, 'Pending handle should be cleared');
+        });
+
+        test('Reconnect with denied permission keeps pending state', async () => {
+            const db = new MockIndexedDB();
+            const handle = new MockFileHandle('test.md', 'denied');
+            await db.set('md-file-handle', handle);
+
+            const manager = new FileHandleManager(db);
+            await manager.restoreFileHandle();
+
+            const result = await manager.reconnectFileHandle();
+
+            assertFalse(result.success, 'Reconnect should fail');
+            assertEqual(result.reason, 'denied', 'Should be denied');
+        });
+
+        test('Save to file succeeds with valid handle', async () => {
+            const db = new MockIndexedDB();
+            const handle = new MockFileHandle('test.md', 'granted');
+            await db.set('md-file-handle', handle);
+
+            const manager = new FileHandleManager(db);
+            await manager.restoreFileHandle();
+
+            const result = await manager.saveToFile('# Test Content');
+
+            assertTrue(result.success, 'Save should succeed');
+        });
+
+        test('Save to file fails if file deleted externally', async () => {
+            const db = new MockIndexedDB();
+            const handle = new MockFileHandle('test.md', 'granted');
+            handle.setFileExists(false);
+            await db.set('md-file-handle', handle);
+
+            const manager = new FileHandleManager(db);
+            await manager.restoreFileHandle();
+
+            const result = await manager.saveToFile('# Test Content');
+
+            assertFalse(result.success, 'Save should fail');
+            assertEqual(result.reason, 'error', 'Should be error');
+            assertEqual(manager.fileHandle, null, 'Handle should be cleared');
+        });
+
+        test('Save without handle fails gracefully', async () => {
+            const db = new MockIndexedDB();
+            const manager = new FileHandleManager(db);
+
+            const result = await manager.saveToFile('# Test Content');
+
+            assertFalse(result.success, 'Save should fail');
+            assertEqual(result.reason, 'no_handle', 'Should indicate no handle');
+        });
+
+        test('Reconnect without pending handle fails', async () => {
+            const db = new MockIndexedDB();
+            const manager = new FileHandleManager(db);
+
+            const result = await manager.reconnectFileHandle();
+
+            assertFalse(result.success, 'Reconnect should fail');
+            assertEqual(result.reason, 'no_pending', 'Should indicate no pending handle');
+        });
+
+        test('File handle persists across manager instances', async () => {
+            const db = new MockIndexedDB();
+            const handle = new MockFileHandle('test.md', 'granted');
+
+            // First manager saves handle
+            const manager1 = new FileHandleManager(db);
+            await manager1.saveFileHandle(handle);
+
+            // Second manager (simulating page refresh) should restore it
+            const manager2 = new FileHandleManager(db);
+            const result = await manager2.restoreFileHandle();
+
+            assertEqual(result.status, 'restored', 'Should restore from IndexedDB');
+            assertEqual(manager2.fileHandle.name, 'test.md', 'Should have same file name');
+        });
+
+        // ========== TEST RUNNER ==========
+
+        async function runAllTests() {
+            const resultsDiv = document.getElementById('test-results');
+            const summaryDiv = document.getElementById('summary');
+            resultsDiv.innerHTML = '';
+            results.pass = 0;
+            results.fail = 0;
+
+            for (const t of tests) {
+                const testDiv = document.createElement('div');
+                testDiv.className = 'test-case pending';
+                testDiv.innerHTML = `<span>${t.name}</span><span class="status">Running...</span>`;
+                resultsDiv.appendChild(testDiv);
+
+                try {
+                    await t.fn();
+                    testDiv.className = 'test-case pass';
+                    testDiv.innerHTML = `<span>${t.name}</span><span class="status">PASS</span>`;
+                    results.pass++;
+                } catch (err) {
+                    testDiv.className = 'test-case fail';
+                    testDiv.innerHTML = `
+                        <div>
+                            <span>${t.name}</span>
+                            <div class="error-details">${err.message}</div>
+                        </div>
+                        <span class="status">FAIL</span>
+                    `;
+                    results.fail++;
+                }
+            }
+
+            const total = results.pass + results.fail;
+            const passRate = ((results.pass / total) * 100).toFixed(1);
+            summaryDiv.innerHTML = `
+                <strong>Test Summary</strong><br>
+                Total: ${total} |
+                <span style="color: #4ade80">Passed: ${results.pass}</span> |
+                <span style="color: #f87171">Failed: ${results.fail}</span><br>
+                Pass Rate: ${passRate}%
+            `;
+        }
+
+        // Auto-run tests on page load
+        window.onload = runAllTests;
+    </script>
+</body>
+</html>

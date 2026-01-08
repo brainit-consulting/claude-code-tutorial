@@ -1203,13 +1203,22 @@
                     console.log('File handle reconnected');
                     return true;
                 }
+                // Permission denied - keep pending handle for retry
+                console.log('Permission not granted, keeping pending handle for retry');
+                return false;
             } catch (err) {
-                console.log('Could not reconnect:', err);
-                pendingHandle = null;
-                await clearFileHandle();
-                updateExportButton();
+                // Only clear if it's a real error, not user cancellation
+                if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
+                    console.log('Permission error, clearing handle:', err);
+                    pendingHandle = null;
+                    await clearFileHandle();
+                    updateExportButton();
+                } else {
+                    // User cancelled or other error - keep pending for retry
+                    console.log('Reconnect cancelled or failed, keeping pending:', err.name);
+                }
+                return false;
             }
-            return false;
         }
 
         // Update export button appearance

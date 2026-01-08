@@ -27,6 +27,8 @@
 - [x] Auto-restore with permission request on page load
 - [x] Auto-sync on: create, edit, delete, drag/drop
 - [x] **Newest tasks appear first** (sorted by task number descending)
+- [x] **Robust reconnect** - Keeps pending handle on user cancellation for retry
+- [x] Unit tests for file linking logic (`tests/test-md-file-link.html`)
 
 #### Build Button
 - [x] Hammer icon on each task card
@@ -68,6 +70,7 @@
 ### Files
 - `kanban.html` - Single-file application (HTML + CSS + JS)
 - `docs/progress.md` - This file
+- `tests/test-md-file-link.html` - Unit tests for MD file linking
 - `.gitignore` - Ignores local-only files
 
 ### GitHub Repository
