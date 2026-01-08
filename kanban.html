@@ -51,6 +51,22 @@
             border-color: #7ec8e3;
         }
 
+        .logo-link {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
         .export-btn {
             padding: 10px 20px;
             background-color: #0f3460;
@@ -679,6 +695,9 @@
 </head>
 <body>
     <div class="header">
+        <a href="https://brainitconsulting.com/" target="_blank" class="logo-link" title="BrainIT Consulting">
+            <img src="https://img1.wsimg.com/isteam/ip/deac7fcc-497b-4e83-8280-f4ec9c3eb3ce/BrainITBrain1.png/:/rs=w:200,h:200,cg:true,m/cr=w:200,h:200/qt=q:95" alt="BrainIT Consulting" class="logo">
+        </a>
         <h1 id="board-title" contenteditable="true" spellcheck="false" title="Click to edit title">Kanban Board</h1>
         <button class="export-btn" id="export-btn" onclick="handleExport()">
             <span>📄</span> <span id="export-text">Link MD File</span>
