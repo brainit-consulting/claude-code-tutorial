@@ -1,8 +1,52 @@
 # Kanban Board Features
 
-*Last updated: 1/7/2026, 8:38:03 PM*
+*Last updated: 1/8/2026, 7:45:34 AM*
 
 ## 📋 Todo
+
+### #015 test
+- **Priority:** low
+
+### #012 run_scorpion_sf_ladder.bat
+- **Priority:** low
+- **Description:** - Uses `-reset`
+- Uses a **single, isolated output directory**
+- Sweeps Stockfish movetimes
+- Correctly finds the **~50% score crossover**
+- Properly uses `-swap`, `-fenSuite`, fixed seed
+
+Purpose: *find a comparable opponent*
+- **Tags:** chess, elo, ladder, scorpion, stockfish
+
+### #011 claude deep dive agents
+- **Priority:** low
+- **Description:** tell claude to fire up 3 parallell deep dive agents to look for and fix any critical bugs the kanban application
+- **Tags:** claude, learn, agents
+
+## 🔄 In Progress
+
+### #013 replace x with bin svg icon
+- **Priority:** low
+- **Description:** Each task currently uses an x for deleting the task. change the x for a svg bin icon
+- **Tags:** kanban
+
+### #007 Learn Plusify
+- **Priority:** medium
+- **Description:** From Leon
+https://www.skool.com/agentic-labs/classroom/18df5641?md=a4fba50bef8f42b885dfb598133092f5
+
+### #002 Learn Claude Code
+- **Priority:** high
+- **Description:** Follow Leon's videos
+- **Tags:** code, learn, claude
+
+## ✅ Done
+
+### #014 action icons needs more room
+- **Priority:** low
+- **Description:** give a little bit more room for the action icons of each task by move the title of each task down a bit, they should not make    
+  the hard to use by blocking them
+- **Tags:** kanban
 
 ### #010 Move +Add Task Buttons to Top
 - **Priority:** low
@@ -12,46 +56,8 @@
 ### #009 test relinking of md file
 - **Priority:** low
 
-### #007 Learn Plusify
-- **Priority:** medium
-- **Description:** From Leon
-
-## 🔄 In Progress
-
 ### #008 Collapse / Expand Done Tasks
 - **Priority:** low
 - **Description:** Design a plan to effectively manage Done Tasks by allow the user to a) Collapse/Expand them and b) add an Arhive Done Tasks Feature. Also, Make sure the icons with hammer, edit etc is never blocked by the Task title
-- **Tags:** kanban
-
-### #002 Learn Claude Code
-- **Priority:** high
-- **Description:** Follow Leon's videos
-- **Tags:** code, learn, claude
-
-## ✅ Done
-
-### #006 Improve the Auto-Saving Feature for .md file
-- **Priority:** medium
-- **Description:** The kanban-features.md should remain linked once linked and automatically refreshes as tasks are updated on the kanban board. New Tasks should also always be inserted at the top of the kanban-features.md file
-- **Tags:** kanban, markdown
-
-### #005 Test if Md file auto updates
-- **Priority:** low
-- **Description:** When user adds tasks to the kanban board, or edit an existing task, test if the kanban-features.md file (when linked) automatically saves and synchronizes the data
-- **Tags:** kanban
-
-### #004 create Kanban Board User Guide
-- **Priority:** low
-- **Description:** Creae a simple help information icon that explains to user how to use this app
-- **Tags:** user guide, kanban app
-
-### #003 Updated Kanban App for CRUD
-- **Priority:** medium
-- **Description:** Enhance to add CRUD operations not already implemented
-- **Tags:** kanban, coding
-
-### #001 add numbers to tasks
-- **Priority:** low
-- **Description:** unique nnn
 - **Tags:** kanban
 
