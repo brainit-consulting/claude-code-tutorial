@@ -203,6 +203,12 @@
             min-height: 400px;
         }
 
+        .tasks.drag-over {
+            background-color: rgba(126, 200, 227, 0.1);
+            border: 2px dashed #7ec8e3;
+            border-radius: 8px;
+        }
+
         .task {
             background-color: #1a1a2e;
             border-radius: 8px;
@@ -1095,14 +1101,14 @@
             div.addEventListener('dragend', handleDragEnd);
 
             // Allow drop on task cards by delegating to parent container
-            div.addEventListener('dragover', function(e) {
+            function handleTaskDragOver(e) {
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'move';
-            });
+            }
 
-            div.addEventListener('drop', function(e) {
+            function handleTaskDrop(e) {
                 e.preventDefault();
-                const container = this.closest('.tasks');
+                const container = div.closest('.tasks');
                 if (draggedTask && container) {
                     const taskId = draggedTask.dataset.id;
                     const newStatus = container.dataset.status;
@@ -1114,6 +1120,15 @@
                         saveMarkdownToFile();
                     }
                 }
+            }
+
+            div.addEventListener('dragover', handleTaskDragOver);
+            div.addEventListener('drop', handleTaskDrop);
+
+            // Also handle drag events on child elements (buttons, etc.)
+            div.querySelectorAll('button, .task-title, .task-description, .task-meta').forEach(child => {
+                child.addEventListener('dragover', handleTaskDragOver);
+                child.addEventListener('drop', handleTaskDrop);
             });
 
             return div;
@@ -1314,6 +1329,41 @@
                     const taskId = draggedTask.dataset.id;
                     const newStatus = this.dataset.status;
 
+                    const task = tasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = newStatus;
+                        saveTasks();
+                        renderTasks();
+                        saveMarkdownToFile();
+                    }
+                }
+            });
+        });
+
+        // Allow dropping anywhere in a column (delegate to .tasks container)
+        document.querySelectorAll('.column').forEach(column => {
+            column.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                const container = this.querySelector('.tasks');
+                if (container) container.classList.add('drag-over');
+            });
+
+            column.addEventListener('dragleave', function(e) {
+                // Only remove if leaving the column entirely
+                if (!this.contains(e.relatedTarget)) {
+                    const container = this.querySelector('.tasks');
+                    if (container) container.classList.remove('drag-over');
+                }
+            });
+
+            column.addEventListener('drop', function(e) {
+                e.preventDefault();
+                const container = this.querySelector('.tasks');
+                if (container) container.classList.remove('drag-over');
+                if (draggedTask && container) {
+                    const taskId = draggedTask.dataset.id;
+                    const newStatus = container.dataset.status;
                     const task = tasks.find(t => t.id === taskId);
                     if (task) {
                         task.status = newStatus;
