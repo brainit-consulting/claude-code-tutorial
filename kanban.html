@@ -502,6 +502,51 @@
         let fileHandle = null;
         let nextTaskNumber = parseInt(localStorage.getItem('kanban-next-number')) || 1;
 
+        // IndexedDB for persisting file handle
+        const DB_NAME = 'kanban-db';
+        const STORE_NAME = 'file-handles';
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+                request.onupgradeneeded = (e) => {
+                    e.target.result.createObjectStore(STORE_NAME);
+                };
+            });
+        }
+
+        async function saveFileHandle(handle) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                tx.objectStore(STORE_NAME).put(handle, 'md-file');
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        async function loadFileHandle() {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const request = tx.objectStore(STORE_NAME).get('md-file');
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function clearFileHandle() {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                tx.objectStore(STORE_NAME).delete('md-file');
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
         function saveTasks() {
             localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
         }
@@ -523,9 +568,11 @@
             let md = `# Kanban Board Features\n\n`;
             md += `*Last updated: ${now}*\n\n`;
 
-            const todoTasks = tasks.filter(t => t.status === 'todo');
-            const inProgressTasks = tasks.filter(t => t.status === 'in-progress');
-            const doneTasks = tasks.filter(t => t.status === 'done');
+            // Sort by taskNumber descending (newest first)
+            const sortNewestFirst = (a, b) => (b.taskNumber || 0) - (a.taskNumber || 0);
+            const todoTasks = tasks.filter(t => t.status === 'todo').sort(sortNewestFirst);
+            const inProgressTasks = tasks.filter(t => t.status === 'in-progress').sort(sortNewestFirst);
+            const doneTasks = tasks.filter(t => t.status === 'done').sort(sortNewestFirst);
 
             if (todoTasks.length > 0) {
                 md += `## 📋 Todo\n\n`;
@@ -582,6 +629,7 @@
             } catch (err) {
                 console.error('Error saving markdown:', err);
                 fileHandle = null;
+                await clearFileHandle();
                 updateExportButton();
             }
         }
@@ -603,12 +651,32 @@
                         accept: { 'text/markdown': ['.md'] }
                     }]
                 });
+                await saveFileHandle(fileHandle);
                 await saveMarkdownToFile();
                 updateExportButton();
             } catch (err) {
                 if (err.name !== 'AbortError') {
                     console.error('Error:', err);
                 }
+            }
+        }
+
+        // Restore file handle on page load
+        async function restoreFileHandle() {
+            try {
+                const handle = await loadFileHandle();
+                if (handle) {
+                    // Request permission to use the stored handle
+                    const permission = await handle.requestPermission({ mode: 'readwrite' });
+                    if (permission === 'granted') {
+                        fileHandle = handle;
+                        updateExportButton();
+                        console.log('File handle restored');
+                    }
+                }
+            } catch (err) {
+                console.log('Could not restore file handle:', err);
+                await clearFileHandle();
             }
         }
 
@@ -868,6 +936,7 @@
         // Initial render
         migrateExistingTasks();
         renderTasks();
+        restoreFileHandle();
     </script>
 </body>
 </html>
