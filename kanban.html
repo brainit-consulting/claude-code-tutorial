@@ -714,7 +714,22 @@
             }
         });
 
+        // Assign numbers to existing tasks that don't have them
+        function migrateExistingTasks() {
+            let modified = false;
+            tasks.forEach(task => {
+                if (!task.taskNumber) {
+                    task.taskNumber = getNextTaskNumber();
+                    modified = true;
+                }
+            });
+            if (modified) {
+                saveTasks();
+            }
+        }
+
         // Initial render
+        migrateExistingTasks();
         renderTasks();
     </script>
 </body>
