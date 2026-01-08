@@ -256,10 +256,10 @@
             background-color: #c73e54;
         }
 
-        .delete-btn {
+        .delete-btn,
+        .edit-btn {
             position: absolute;
             top: 8px;
-            right: 8px;
             background: none;
             border: none;
             color: #666;
@@ -269,8 +269,20 @@
             line-height: 1;
         }
 
+        .delete-btn {
+            right: 8px;
+        }
+
+        .edit-btn {
+            right: 32px;
+        }
+
         .delete-btn:hover {
             color: #e94560;
+        }
+
+        .edit-btn:hover {
+            color: #7ec8e3;
         }
 
         .task {
@@ -313,8 +325,9 @@
     <!-- Modal -->
     <div class="modal-overlay" id="modal">
         <div class="modal">
-            <h2>Add New Task</h2>
+            <h2 id="modal-title">Add New Task</h2>
             <form id="task-form">
+                <input type="hidden" id="task-id">
                 <input type="hidden" id="task-status">
                 <div class="form-group">
                     <label for="task-title">Title</label>
@@ -366,7 +379,8 @@
                 : '';
 
             div.innerHTML = `
-                <button class="delete-btn" onclick="deleteTask('${task.id}')">&times;</button>
+                <button class="delete-btn" onclick="deleteTask('${task.id}')" title="Delete">&times;</button>
+                <button class="edit-btn" onclick="editTask('${task.id}')" title="Edit">&#9998;</button>
                 <div class="task-title">${task.title}</div>
                 <div class="task-description">${task.description || 'No description'}</div>
                 <div class="task-meta">
@@ -407,7 +421,24 @@
         }
 
         function openModal(status) {
+            document.getElementById('task-id').value = '';
             document.getElementById('task-status').value = status;
+            document.getElementById('modal-title').textContent = 'Add New Task';
+            document.getElementById('modal').classList.add('active');
+            document.getElementById('task-title').focus();
+        }
+
+        function editTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+
+            document.getElementById('task-id').value = task.id;
+            document.getElementById('task-status').value = task.status;
+            document.getElementById('task-title').value = task.title;
+            document.getElementById('task-description').value = task.description || '';
+            document.getElementById('task-priority').value = task.priority;
+            document.getElementById('task-tags').value = task.tags.join(', ');
+            document.getElementById('modal-title').textContent = 'Edit Task';
             document.getElementById('modal').classList.add('active');
             document.getElementById('task-title').focus();
         }
@@ -415,13 +446,14 @@
         function closeModal() {
             document.getElementById('modal').classList.remove('active');
             document.getElementById('task-form').reset();
+            document.getElementById('task-id').value = '';
         }
 
         document.getElementById('task-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const task = {
-                id: generateId(),
+            const existingId = document.getElementById('task-id').value;
+            const taskData = {
                 title: document.getElementById('task-title').value.trim(),
                 description: document.getElementById('task-description').value.trim(),
                 priority: document.getElementById('task-priority').value,
@@ -432,7 +464,17 @@
                 status: document.getElementById('task-status').value
             };
 
-            tasks.push(task);
+            if (existingId) {
+                // Update existing task
+                const taskIndex = tasks.findIndex(t => t.id === existingId);
+                if (taskIndex !== -1) {
+                    tasks[taskIndex] = { ...tasks[taskIndex], ...taskData };
+                }
+            } else {
+                // Create new task
+                tasks.push({ id: generateId(), ...taskData });
+            }
+
             saveTasks();
             renderTasks();
             closeModal();
