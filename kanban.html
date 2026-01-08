@@ -562,6 +562,30 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .archived-header:hover {
+            opacity: 0.8;
+        }
+
+        .archived-collapse-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 2px 6px;
+            margin-right: 8px;
+            transition: transform 0.2s;
+        }
+
+        .archived-collapse-btn.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        #archived-tasks.collapsed {
+            display: none;
         }
 
         .archived-title {
@@ -670,6 +694,7 @@
             <button class="archive-btn" id="archive-btn" onclick="archiveDoneTasks()">📦 Archive All Done Tasks</button>
             <div class="archived-section" id="archived-section" style="display: none;">
                 <div class="archived-header">
+                    <button class="archived-collapse-btn" id="archived-collapse-btn" onclick="toggleArchivedCollapse()" title="Collapse/Expand">▼</button>
                     <span class="archived-title">📁 Archived <span class="archived-count" id="archived-count">0</span></span>
                     <button class="clear-archived-btn" onclick="clearArchivedTasks()">Clear All</button>
                 </div>
@@ -780,6 +805,7 @@
         let tasks = JSON.parse(localStorage.getItem('kanban-tasks')) || [];
         let archivedTasks = JSON.parse(localStorage.getItem('kanban-archived')) || [];
         let doneCollapsed = localStorage.getItem('kanban-done-collapsed') === 'true';
+        let archivedCollapsed = localStorage.getItem('kanban-archived-collapsed') === 'true';
         let boardTitle = localStorage.getItem('kanban-board-title') || 'Kanban Board';
         let fileHandle = null;
         let nextTaskNumber = parseInt(localStorage.getItem('kanban-next-number')) || 1;
@@ -863,6 +889,28 @@
                 btn.textContent = '▼';
                 tasksContainer.classList.remove('collapsed');
                 archiveBtn.style.display = 'block';
+            }
+        }
+
+        // Toggle collapse for Archived section
+        function toggleArchivedCollapse() {
+            archivedCollapsed = !archivedCollapsed;
+            localStorage.setItem('kanban-archived-collapsed', archivedCollapsed.toString());
+            updateArchivedCollapseUI();
+        }
+
+        function updateArchivedCollapseUI() {
+            const btn = document.getElementById('archived-collapse-btn');
+            const tasksContainer = document.getElementById('archived-tasks');
+
+            if (archivedCollapsed) {
+                btn.classList.add('collapsed');
+                btn.textContent = '▶';
+                tasksContainer.classList.add('collapsed');
+            } else {
+                btn.classList.remove('collapsed');
+                btn.textContent = '▼';
+                tasksContainer.classList.remove('collapsed');
             }
         }
 
@@ -1508,6 +1556,7 @@
         renderTasks();
         renderArchivedTasks();
         updateDoneCollapseUI();
+        updateArchivedCollapseUI();
         initBoardTitle();
         restoreFileHandle();
     </script>

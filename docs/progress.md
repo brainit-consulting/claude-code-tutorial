@@ -46,6 +46,8 @@
 - [x] **Restore** - Bring archived tasks back to Done column
 - [x] **Clear Archive** - Permanently delete archived tasks
 - [x] Archived tasks stored in localStorage
+- [x] **Archive Collapse/Expand** - Toggle button (▼/▶) to hide/show archived tasks
+- [x] Archive collapse state persists across sessions
 
 #### Customization
 - [x] **Editable Board Title** - Click the title to edit, press Enter or blur to save
